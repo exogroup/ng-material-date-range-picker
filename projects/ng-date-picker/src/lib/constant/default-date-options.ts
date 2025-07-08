@@ -42,6 +42,14 @@ export const DEFAULT_DATE_OPTIONS: ISelectDateOption[] = <ISelectDateOption[]>[
     excludeToday: true,
   },
   {
+    optionLabel: 'Last 30 Days',
+    optionKey: DEFAULT_DATE_OPTION_ENUM.DATE_DIFF,
+    dateKey: DATE_DEFAULT_OPTIONS_KEYS.LAST30DAYS,
+    dateDiff: -29,
+    isSelected: false,
+    isVisible: true,
+  },
+  {
     optionLabel: 'Last 30 Days (Excl. Today)',
     optionKey: DEFAULT_DATE_OPTION_ENUM.DATE_DIFF,
     dateKey: DATE_DEFAULT_OPTIONS_KEYS.LAST30DAYSEXCLUDETODAY,
@@ -49,14 +57,6 @@ export const DEFAULT_DATE_OPTIONS: ISelectDateOption[] = <ISelectDateOption[]>[
     isSelected: false,
     isVisible: true,
     excludeToday: true,
-  },
-  {
-    optionLabel: 'Last 30 Days',
-    optionKey: DEFAULT_DATE_OPTION_ENUM.DATE_DIFF,
-    dateKey: DATE_DEFAULT_OPTIONS_KEYS.LAST30DAYS,
-    dateDiff: -29,
-    isSelected: false,
-    isVisible: true,
   },
   {
     optionLabel: 'This Month',
