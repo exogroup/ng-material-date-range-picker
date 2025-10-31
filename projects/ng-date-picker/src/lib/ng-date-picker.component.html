@@ -32,7 +32,7 @@
               <span *ngFor="let option of visibleDateDropDownOptions">
                 <span
                   *ngIf="option.isVisible"
-                  class="option-ele"
+                  class="option-ele-mobile"
                   (click)="updateSelection(option)"
                   [ngClass]="{ 'option-selected': option.isSelected }">
                   {{ option.optionLabel }}
