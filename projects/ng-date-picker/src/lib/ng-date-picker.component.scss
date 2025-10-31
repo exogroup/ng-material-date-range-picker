@@ -17,7 +17,7 @@ mat-list-item {
   max-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  max-width: 700px;
+  max-width: 710px;
   margin-top: 8px;
   border: 1px solid var(--border-color, #ddd);
 }
@@ -137,6 +137,25 @@ mat-list-item {
   display: flex;
   justify-content: center;
 
+  .scrollable-options-wrapper {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    gap: 12px;
+
+    .option-ele-mobile {
+      white-space: normal;
+      text-align: center;
+      min-width: 60px;
+      max-width: 90px;
+      cursor: pointer;
+
+     &.option-selected {
+      color: #0072ba;
+     }
+    }
+  }
+
   .option-ele {
     cursor: pointer;
     font-size: 13px;
@@ -145,6 +164,20 @@ mat-list-item {
 
     &.option-selected {
       color: #0072ba;
+    }
+  }
+  .scroll-icon {
+    font-size: 26px;
+    height: auto;
+    width: auto;
+  }
+
+  button[disabled] {
+    opacity: 0.4;
+    color: #ccc !important;
+
+    .scroll-icon {
+      color: #ccc !important;
     }
   }
 }
