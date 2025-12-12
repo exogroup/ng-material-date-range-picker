@@ -1,6 +1,6 @@
 {
   "name": "@exogroup/ng-material-date-range-picker",
-  "version": "1.0.19",
+  "version": "1.0.22",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -10,7 +10,10 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
-  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "private": false,
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/cdk": "^16.2.14",

@@ -1,6 +1,6 @@
 {
   "name": "@exogroup/ng-material-date-range-picker",
-  "version": "1.0.19",
+  "version": "1.0.22",
   "description": "This library provides the date range selection with two views.",
   "peerDependencies": {
     "@angular/common": "^16.2.12",
@@ -29,6 +29,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/exogroup/ng-material-date-range-picker.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "homepage": "https://github.com/exogroup/ng-material-date-range-picker"
 }
