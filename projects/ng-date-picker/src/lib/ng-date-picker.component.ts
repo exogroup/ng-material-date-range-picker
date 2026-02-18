@@ -183,6 +183,8 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    * Calculate the state of scroll buttons based on the current scroll position and total scrollable width
    */
   calculateScrollButtonsState() {
+    if (!this.scrollableWrapper) return;
+
     const el = this.scrollableWrapper.nativeElement;
     const tolerance = 2;
 
