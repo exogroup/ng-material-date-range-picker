@@ -144,10 +144,8 @@ mat-list-item {
     gap: 12px;
 
     .option-ele-mobile {
-      white-space: normal;
+      white-space: nowrap;
       text-align: center;
-      min-width: 60px;
-      max-width: 90px;
       cursor: pointer;
 
      &.option-selected {

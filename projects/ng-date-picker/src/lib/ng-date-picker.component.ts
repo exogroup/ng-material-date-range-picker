@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnInit,
-  Output
+  Output,
+  ViewChild
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DateRange } from '@angular/material/datepicker';
@@ -48,8 +50,10 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
   backdropClass = 'date-rage-picker-backdrop';
   date = new FormControl();
   isMobileView = false;
-  visibleStartIndex: number = 0;
-  visibleCount: number = 3;
+  isRightDisabled = false;
+  isLeftDisabled = false;
+
+  @ViewChild('scrollableWrapper', { read: ElementRef }) scrollableWrapper!: ElementRef<HTMLDivElement>;
 
   @Input() set locale(value: string | undefined) {
     if (value) {
@@ -80,18 +84,6 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
       this._endDate = endDate;
       this.updateDefaultDates();
     }
-  }
-
-  get visibleDateDropDownOptions(): ISelectDateOption[] {
-    return this._dateDropDownOptions.slice(this.visibleStartIndex, this.visibleStartIndex + this.visibleCount);
-  }
-
-  get isLeftDisabled(): boolean {
-    return this.visibleStartIndex === 0;
-  }
-
-  get isRightDisabled(): boolean {
-    return this.visibleStartIndex + this.visibleCount >= this._dateDropDownOptions.length;
   }
 
   /** Set date range options */
@@ -164,8 +156,12 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    * Move to the left when user clicks on left arrow
    */
   scrollLeft(): void {
-    if (this.visibleStartIndex > 0) {
-      this.visibleStartIndex--;
+    if (this.scrollableWrapper?.nativeElement) {
+      const scrollDistance = this.scrollableWrapper.nativeElement.clientWidth * 0.6;
+      this.scrollableWrapper.nativeElement.scrollBy({
+        left: -scrollDistance,
+        behavior: 'smooth'
+      });
     }
   }
 
@@ -173,10 +169,32 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    * Move to the right when user clicks on right arrow
    */
   scrollRight(): void {
-    if (this.visibleStartIndex + this.visibleCount < this._dateDropDownOptions.length) {
-      this.visibleStartIndex++;
+    if (this.scrollableWrapper?.nativeElement) {
+      const scrollDistance = this.scrollableWrapper.nativeElement.clientWidth * 0.6;
+      this.scrollableWrapper.nativeElement.scrollBy({
+        left: scrollDistance,
+        behavior: 'smooth'
+      });
     }
   }
+
+  /**
+   * Calculate the state of scroll buttons based on the current scroll position and total scrollable width
+   */
+  calculateScrollButtonsState() {
+    const el = this.scrollableWrapper.nativeElement;
+    const tolerance = 2;
+
+    // Right button
+    const rightEdge = Math.abs(el.scrollLeft + el.clientWidth - el.scrollWidth);
+    this.isRightDisabled = rightEdge <= tolerance;
+
+    // Left button
+    this.isLeftDisabled = el.scrollLeft === 0;
+
+    this.cdref.markForCheck();
+  }
+
   /**
    * Change locale for datepicker
    *
@@ -206,6 +224,11 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    */
   toggleDateOptionSelectionList(): void {
     this.isOpen = !this.isOpen;
+
+    // Do initial calculations for scroll buttons state
+    setTimeout(() => {
+        this.calculateScrollButtonsState();
+    });
   }
 
   /**

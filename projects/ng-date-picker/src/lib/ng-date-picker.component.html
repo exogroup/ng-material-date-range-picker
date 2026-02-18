@@ -28,8 +28,10 @@
               aria-label="Previous options">
               <mat-icon class="scroll-icon">chevron_left</mat-icon>
             </button>
-            <div class="scrollable-options-wrapper">
-              <span *ngFor="let option of visibleDateDropDownOptions">
+            <div class="scrollable-options-wrapper"
+              (scroll)="calculateScrollButtonsState()"
+              #scrollableWrapper>
+              <ng-container *ngFor="let option of dateDropDownOptions">
                 <span
                   *ngIf="option.isVisible"
                   class="option-ele-mobile"
@@ -37,7 +39,7 @@
                   [ngClass]="{ 'option-selected': option.isSelected }">
                   {{ option.optionLabel }}
                 </span>
-              </span>
+              </ng-container>
             </div>
             <button mat-button
               (click)="scrollRight()"
@@ -47,7 +49,7 @@
             </button>
           </div>
           <div class="default-options-container desktop" *ngIf="!isMobileView">
-            <span *ngFor="let option of dateDropDownOptions">
+            <ng-container *ngFor="let option of dateDropDownOptions">
               <span
                 *ngIf="option.isVisible"
                 class="option-ele"
@@ -55,7 +57,7 @@
                 [ngClass]="{ 'option-selected': option.isSelected }">
                 {{option.optionLabel}}
               </span>
-            </span>
+            </ng-container>
           </div>
         </div>
         <div class="mt-2 column-2">
