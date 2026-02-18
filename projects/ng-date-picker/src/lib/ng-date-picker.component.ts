@@ -21,6 +21,7 @@ import { DATE_DEFAULT_OPTIONS_KEYS } from './constant/date-default-options-keys.
 import { ISelectDateOption } from './model/select-date-option';
 import { SelectedDateEvent } from './model/date-selection-event-data';
 import { LabelsConfig } from './model/labels-config.model';
+import { isElementInView, scrollElementIntoView } from './helpers/scroll-helper';
 
 @Component({
   selector: 'ng-date-range-picker',
@@ -228,7 +229,28 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
     // Do initial calculations for scroll buttons state
     setTimeout(() => {
         this.calculateScrollButtonsState();
+        this.scrollToSelectedOption();
     });
+  }
+
+  /**
+   * Scroll to the selected option if it's not currently in view (mobile only)
+   */
+  private scrollToSelectedOption(): void {
+    if (!this.scrollableWrapper?.nativeElement || !this.isMobileView) {
+      return;
+    }
+
+    const container = this.scrollableWrapper.nativeElement;
+    const selectedElement = container.querySelector('.option-selected');
+
+    if (selectedElement && !isElementInView(container, selectedElement as HTMLElement)) {
+      scrollElementIntoView(container, selectedElement as HTMLElement, {
+        behavior: 'auto',
+        block: 'center',
+        onScrollComplete: () => this.calculateScrollButtonsState()
+      });
+    }
   }
 
   /**
@@ -445,7 +467,6 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
         } else {
           calculatedLabel = `${moment(dates.start).format('YYYY-MM-DD')} - ${moment(dates.end).format('YYYY-MM-DD')}`;
         }
-        
         this._dateDropDownOptions[i].isSelected = true;
       }
     }
