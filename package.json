@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "link:ng-components": "node link-projects.js",
+    "build:watch": "ng build @exogroup/ng-material-date-range-picker --watch"
   },
   "private": true,
   "dependencies": {
@@ -33,6 +35,7 @@
     "@angular/compiler-cli": "^16.2.0",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.6.0",
+    "json5": "^2.2.3",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
