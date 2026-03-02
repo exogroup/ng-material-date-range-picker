@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnInit,
-  Output
+  Output,
+  ViewChild
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DateRange } from '@angular/material/datepicker';
@@ -19,6 +21,7 @@ import { DATE_DEFAULT_OPTIONS_KEYS } from './constant/date-default-options-keys.
 import { ISelectDateOption } from './model/select-date-option';
 import { SelectedDateEvent } from './model/date-selection-event-data';
 import { LabelsConfig } from './model/labels-config.model';
+import { isElementInView, scrollElementIntoView } from './helpers/scroll-helper';
 
 @Component({
   selector: 'ng-date-range-picker',
@@ -47,6 +50,11 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
 
   backdropClass = 'date-rage-picker-backdrop';
   date = new FormControl();
+  isMobileView = false;
+  isRightDisabled = false;
+  isLeftDisabled = false;
+
+  @ViewChild('scrollableWrapper', { read: ElementRef }) scrollableWrapper!: ElementRef<HTMLDivElement>;
 
   @Input() set locale(value: string | undefined) {
     if (value) {
@@ -78,6 +86,7 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
       this.updateDefaultDates();
     }
   }
+
   /** Set date range options */
   @Input() set dateDropDownOptions(defaultDateList: ISelectDateOption[]) {
     if (defaultDateList && defaultDateList.length) {
@@ -127,6 +136,10 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
       this._defaultOptionsInUse = true;
     }
     this.calculateLabel();
+    this.isMobileView = window.innerWidth <= 768;
+    window.addEventListener('resize', () => {
+      this.isMobileView = window.innerWidth <= 768;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -138,6 +151,51 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
         }
       }
     });
+  }
+
+  /**
+   * Move to the left when user clicks on left arrow
+   */
+  scrollLeft(): void {
+    if (this.scrollableWrapper?.nativeElement) {
+      const scrollDistance = this.scrollableWrapper.nativeElement.clientWidth * 0.6;
+      this.scrollableWrapper.nativeElement.scrollBy({
+        left: -scrollDistance,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  /**
+   * Move to the right when user clicks on right arrow
+   */
+  scrollRight(): void {
+    if (this.scrollableWrapper?.nativeElement) {
+      const scrollDistance = this.scrollableWrapper.nativeElement.clientWidth * 0.6;
+      this.scrollableWrapper.nativeElement.scrollBy({
+        left: scrollDistance,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  /**
+   * Calculate the state of scroll buttons based on the current scroll position and total scrollable width
+   */
+  calculateScrollButtonsState() {
+    if (!this.scrollableWrapper) return;
+
+    const el = this.scrollableWrapper.nativeElement;
+    const tolerance = 2;
+
+    // Right button
+    const rightEdge = Math.abs(el.scrollLeft + el.clientWidth - el.scrollWidth);
+    this.isRightDisabled = rightEdge <= tolerance;
+
+    // Left button
+    this.isLeftDisabled = el.scrollLeft === 0;
+
+    this.cdref.markForCheck();
   }
 
   /**
@@ -169,6 +227,32 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    */
   toggleDateOptionSelectionList(): void {
     this.isOpen = !this.isOpen;
+
+    // Do initial calculations for scroll buttons state
+    setTimeout(() => {
+        this.calculateScrollButtonsState();
+        this.scrollToSelectedOption();
+    });
+  }
+
+  /**
+   * Scroll to the selected option if it's not currently in view (mobile only)
+   */
+  private scrollToSelectedOption(): void {
+    if (!this.scrollableWrapper?.nativeElement || !this.isMobileView) {
+      return;
+    }
+
+    const container = this.scrollableWrapper.nativeElement;
+    const selectedElement = container.querySelector('.option-selected');
+
+    if (selectedElement && !isElementInView(container, selectedElement as HTMLElement)) {
+      scrollElementIntoView(container, selectedElement as HTMLElement, {
+        behavior: 'auto',
+        block: 'center',
+        onScrollComplete: () => this.calculateScrollButtonsState()
+      });
+    }
   }
 
   /**
@@ -329,8 +413,14 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
           case DATE_DEFAULT_OPTIONS_KEYS.LAST7DAYS:
             optionLabel = this.labels.last7daysLabel;
             break;
+          case DATE_DEFAULT_OPTIONS_KEYS.LAST7DAYSEXCLUDETODAY:
+            optionLabel = this.labels.last7daysLabelExcludeToday;
+            break;
           case DATE_DEFAULT_OPTIONS_KEYS.LAST30DAYS:
             optionLabel = this.labels.last30daysLabel;
+            break;
+          case DATE_DEFAULT_OPTIONS_KEYS.LAST30DAYSEXCLUDETODAY:
+            optionLabel = this.labels.last30daysLabelExcludeToday;
             break;
           case DATE_DEFAULT_OPTIONS_KEYS.THIS_MONTH:
             optionLabel = this.labels.thisMonthLabel;
@@ -379,7 +469,6 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
         } else {
           calculatedLabel = `${moment(dates.start).format('YYYY-MM-DD')} - ${moment(dates.end).format('YYYY-MM-DD')}`;
         }
-        
         this._dateDropDownOptions[i].isSelected = true;
       }
     }
@@ -408,6 +497,10 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
 
     switch (option.optionKey) {
       case DEFAULT_DATE_OPTION_ENUM.DATE_DIFF:
+        if (option.excludeToday) {
+          lastDate.setDate(lastDate.getDate() - 1);
+        }
+        startDate = new Date(lastDate);
         startDate.setDate(startDate.getDate() + option.dateDiff);
         break;
       case DEFAULT_DATE_OPTION_ENUM.LAST_MONTH:
