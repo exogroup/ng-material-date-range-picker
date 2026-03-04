@@ -10,7 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "link:ng-components": "node link-projects.js",
-    "build:watch": "ng build @exogroup/ng-date-picker --watch --configuration development"
+    "build:watch": "ng build @exogroup/ng-material-date-range-picker --configuration development --watch"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
