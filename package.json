@@ -8,7 +8,9 @@
     "build:lib:prod": "ng build @exogroup/ng-material-date-range-picker --configuration production",
     "publish:package": "npm run build:lib:prod && cd dist/exogroup/ng-material-date-range-picker && npm publish && cd ../../../",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "link:ng-components": "node link-projects.js",
+    "build:watch": "ng build @exogroup/ng-material-date-range-picker --configuration development --watch"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -38,6 +40,7 @@
     "@angular/compiler-cli": "^16.2.0",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.6.0",
+    "json5": "^2.2.3",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
