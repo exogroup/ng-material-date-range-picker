@@ -16,7 +16,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { DateRange, MatCalendar } from '@angular/material/datepicker';
-import { CalendarViewData } from './../model/calendar-view-data';
+import { CalendarViewData } from '../model/calendar-view-data';
 
 @Component({
   selector: 'lib-calendar',
@@ -27,14 +27,30 @@ import { CalendarViewData } from './../model/calendar-view-data';
 export class CalendarComponent implements OnInit, AfterViewInit {
   firstCalendarViewData!: CalendarViewData;
   secondCalendarViewData!: CalendarViewData;
+
   @Input() selectedDates!: DateRange<Date>;
+  /** Minimum selectable date */
+  @Input() minDate!: Date;
+  /** Maximum selectable date */
+  @Input() set maxDate(maxDate: Date) {
+    if (maxDate) {
+      const maxDateCal1 = new Date(maxDate.getFullYear(), maxDate.getMonth(), 0);
+
+      this._maxDate = {
+        cal1: maxDateCal1,
+        cal2: maxDate
+      }
+    }
+  }
+
   private isAllowHoverEvent: boolean = false;
+  _maxDate!: { cal1: Date, cal2: Date };
 
   @ViewChild('firstCalendarView') firstCalendarView!: MatCalendar<Date>;
   @ViewChild('secondCalendarView') secondCalendarView!: MatCalendar<Date>;
 
   constructor(
-    private cdref: ChangeDetectorRef,
+    private cdRef: ChangeDetectorRef,
     private el: ElementRef,
     private renderer: Renderer2
   ) {}
@@ -79,7 +95,7 @@ export class CalendarComponent implements OnInit, AfterViewInit {
    * @param event Date
    */
   monthSelected(event: Date) {
-    this.secondCalendarView._goToDateInView(event, 'year');
+    this.secondCalendarView._goToDateInView(event, 'multi-year');
     this.handleFirstCalendarNextEvent(this, true);
     setTimeout(() => {
       this.attachHoverEventOnFirstViewDates();
@@ -105,7 +121,7 @@ export class CalendarComponent implements OnInit, AfterViewInit {
       this.isAllowHoverEvent = false;
       this.selectedDates = new DateRange<Date>(selectedDates.start, date);
     }
-    this.cdref.markForCheck();
+    this.cdRef.markForCheck();
   }
 
   /**
@@ -116,11 +132,17 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     const leftDateCalender = classRef.firstCalendarView;
     if (leftDateCalender.currentView.toLocaleLowerCase() === 'month') {
       const date: Date = new Date(leftDateCalender['_clampedActiveDate']);
-      classRef.secondCalendarView.minDate =
-        classRef.getFirstDateOfNextMonth(date);
-      classRef.cdref.markForCheck();
+      classRef.secondCalendarView.minDate = classRef.getFirstDateOfNextMonth(date);
+
+      const currentSecondDate = new Date(classRef.secondCalendarView['_clampedActiveDate'])
+      classRef.secondCalendarView._goToDateInView(currentSecondDate, 'month');
+      classRef.removeDefaultFocus(classRef);
+      classRef.cdRef.markForCheck();
     }
-    classRef.attachHoverEventOnFirstViewDates();
+    setTimeout(() => {
+      classRef.attachHoverEventOnFirstViewDates();
+      classRef.attachHoverEventOnSecondViewDates();
+    }, 300);
   }
 
   /**
@@ -144,14 +166,29 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     isForced = false
   ): void {
     const firstCalendar = classRef.firstCalendarView;
+    const secondCalendar = classRef.secondCalendarView;
+
     if (firstCalendar.currentView.toLocaleLowerCase() === 'month' || isForced) {
       const date: Date = new Date(firstCalendar['_clampedActiveDate']);
+      const secondDate: Date = new Date(secondCalendar['_clampedActiveDate']);
       const nextMonthDate = classRef.getFirstDateOfNextMonth(date);
+
       classRef.secondCalendarView.minDate = nextMonthDate;
-      classRef.secondCalendarView._goToDateInView(nextMonthDate, 'month');
+
+      if (nextMonthDate > secondDate) {
+        classRef.secondCalendarView._goToDateInView(nextMonthDate, 'month');
+      }
+
       classRef.removeDefaultFocus(classRef);
-      classRef.cdref.markForCheck();
+      classRef.cdRef.markForCheck();
+      classRef.cdRef.detectChanges();
     }
+
+    // force refresh on multi year view
+    if (classRef.firstCalendarView.yearView && classRef.secondCalendarView.multiYearView) { 
+      classRef.secondCalendarView.multiYearView._init();
+    }
+
     setTimeout(() => {
       classRef.attachHoverEventOnFirstViewDates();
       classRef.attachHoverEventOnSecondViewDates();
@@ -281,7 +318,9 @@ export class CalendarComponent implements OnInit, AfterViewInit {
    */
   private initFirstCalendar(): void {
     this.firstCalendarViewData = new CalendarViewData();
-    this.firstCalendarViewData.startDate = new Date();
+    const currDate = new Date();
+    currDate.setMonth(currDate.getMonth() - 1);
+    this.firstCalendarViewData.startDate = this.selectedDates?.start ? this.selectedDates.start : currDate;
   }
 
   /**
@@ -290,12 +329,20 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   private initSecondCalendar(): void {
     const currDate = new Date();
     this.secondCalendarViewData = new CalendarViewData();
-    this.secondCalendarViewData.minDate =
-      this.getFirstDateOfNextMonth(currDate);
-    currDate.setMonth(currDate.getMonth() + 1);
-    this.secondCalendarViewData.startDate = this.selectedDates?.end
-      ? this.selectedDates.end
-      : currDate;
+
+    if (this.selectedDates.end && this.selectedDates.start 
+      && this.selectedDates.end.getMonth() === this.selectedDates.start.getMonth()
+      && this.selectedDates.end.getFullYear() === this.selectedDates.start.getFullYear()
+      && currDate.getMonth() !== this.selectedDates.end.getMonth()
+      && (this.selectedDates.end.getMonth() !== 11 
+      || (this.selectedDates.end.getFullYear() !== currDate.getFullYear() && this.selectedDates.end.getMonth() === 11))
+    ) { // range for same month
+      this.secondCalendarViewData.minDate = this.getFirstDateOfNextMonth(this.selectedDates.end);
+    } else {
+      this.secondCalendarViewData.minDate = this.getSecondCalendarMinDate(currDate);
+    }
+
+    this.secondCalendarViewData.startDate = this.selectedDates?.end ? this.selectedDates.end : currDate;
   }
 
   /**
@@ -306,5 +353,30 @@ export class CalendarComponent implements OnInit, AfterViewInit {
    */
   private getFirstDateOfNextMonth(currDate: Date): Date {
     return new Date(currDate.getFullYear(), currDate.getMonth() + 1, 1);
+  }
+
+  /**
+   * Get second calendar min date
+   * 
+   * @param currDate
+   */
+  private getSecondCalendarMinDate(currDate: Date): Date {
+    if (this.selectedDates?.end && (this.selectedDates.end.getFullYear() !== currDate.getFullYear()
+      || (this.selectedDates.end.getFullYear() === currDate.getFullYear() 
+        && this.selectedDates.end.getMonth() !== currDate.getMonth()
+      )
+    )) { // custom range
+      if (this.selectedDates.end.getMonth() === this.selectedDates?.start?.getMonth() 
+        && this.selectedDates.end.getMonth() === 10 
+        && currDate.getMonth() === 11
+        && this.selectedDates.end.getFullYear() === currDate.getFullYear()
+      ) { // last month
+        return this.getFirstDateOfNextMonth(this._maxDate.cal1);
+      } else {
+        return this.selectedDates.end;
+      }
+    } else {
+      return this.getFirstDateOfNextMonth(this._maxDate.cal1);
+    }
   }
 }

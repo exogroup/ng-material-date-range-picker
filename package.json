@@ -1,16 +1,21 @@
 {
-  "name": "@exogroup/ng-date-picker",
-  "version": "2.2.0",
+  "name": "@exogroup/ng-material-date-range-picker",
+  "version": "1.0.23",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:lib:prod": "ng build @exogroup/ng-material-date-range-picker --configuration production",
+    "publish:package": "npm run build:lib:prod && cd dist/exogroup/ng-material-date-range-picker && npm publish && cd ../../../",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "link:ng-components": "node link-projects.js",
     "build:watch": "ng build @exogroup/ng-date-picker --watch --configuration development"
   },
-  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "private": false,
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/cdk": "^16.2.14",

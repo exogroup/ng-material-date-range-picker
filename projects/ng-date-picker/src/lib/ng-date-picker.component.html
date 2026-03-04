@@ -1,29 +1,11 @@
-<!--**
- * @(#)ng-date-picker.component.html Sept 05, 2023
-
- * @author Aakash Kumar
- *-->
-<div class="date-picker-main" cdkOverlayOrigin #trigger>
+<span class="date-picker-main" cdkOverlayOrigin #trigger>
 
   <!-- input form -->
-  <mat-form-field class="w-full" [class]="{'display-hidden':isShowStaticDefaultOptions}"
-    (click)="toggleDateOptionSelectionList()">
-    <mat-label>{{inputLabel}}</mat-label>
-    <input matInput readonly="readonly" #dateInput class="cursor-pointer">
+  <mat-form-field id="{{ calendarIdentifier }}" [class.w-full]="isFullWidth" (click)="toggleDateOptionSelectionList()">
+    <mat-label *ngIf="showLabel">{{ labels?.inputLabel }}</mat-label>
+    <input matInput readonly="readonly" [formControl]="date" class="cursor-pointer">
     <mat-icon matSuffix class="cursor-pointer">date_range</mat-icon>
   </mat-form-field>
-
-  <!-- default options; to remove -->
-  <div *ngIf="dateDropDownOptions && dateDropDownOptions.length && isShowStaticDefaultOptions">
-    <mat-action-list class="w-full custom-ckd-container range-input">
-      <div *ngFor="let option of dateDropDownOptions;">
-        <mat-list-item
-          *ngIf="option.isVisible"
-          [activated]="option.isSelected"
-          (click)="updateSelection(option, dateInput)">{{option.optionLabel}}</mat-list-item>
-      </div>
-    </mat-action-list>
-  </div>
 
   <!-- Panel -->
   <ng-template
@@ -36,41 +18,69 @@
     [cdkConnectedOverlayOffsetX]="cdkConnectedOverlayOffsetX"
     [cdkConnectedOverlayOffsetY]="cdkConnectedOverlayOffsetY"
     (backdropClick)="toggleCustomDateRangeView()">
-    <div class="custom-ckd-container custom-calendar-container" [class]="{'without-default-opt':hideDefaultOptions}">
+    <div class="custom-ckd-container custom-calendar-container" [class]="{ 'without-default-opt': !showDefaultOptions }">
       <div class="row-1">
-        <div class="default-options-container" *ngIf="!hideDefaultOptions">
-          <span *ngFor="let option of dateDropDownOptions">
-            <span
-              *ngIf="option.isVisible"
-              class="option-ele"
-              (click)="updateSelection(option, dateInput)"
-              [ngClass]="{ 'option-selected': option.isSelected }">
-              {{option.optionLabel}}
-            </span>
-          </span>
+        <div *ngIf="dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions">
+          <div class="default-options-container mobile" *ngIf="isMobileView">
+            <button mat-button
+              (click)="scrollLeft()"
+              [disabled]="isLeftDisabled"
+              aria-label="Previous options">
+              <mat-icon class="scroll-icon">chevron_left</mat-icon>
+            </button>
+            <div class="scrollable-options-wrapper"
+              (scroll)="calculateScrollButtonsState()"
+              #scrollableWrapper>
+              <ng-container *ngFor="let option of dateDropDownOptions">
+                <span
+                  *ngIf="option.isVisible"
+                  class="option-ele-mobile"
+                  (click)="updateSelection(option)"
+                  [ngClass]="{ 'option-selected': option.isSelected }">
+                  {{ option.optionLabel }}
+                </span>
+              </ng-container>
+            </div>
+            <button mat-button
+              (click)="scrollRight()"
+              [disabled]="isRightDisabled"
+              aria-label="Next options">
+              <mat-icon class="scroll-icon">chevron_right</mat-icon>
+            </button>
+          </div>
+          <div class="default-options-container desktop" *ngIf="!isMobileView">
+            <ng-container *ngFor="let option of dateDropDownOptions">
+              <span
+                *ngIf="option.isVisible"
+                class="option-ele"
+                (click)="updateSelection(option)"
+                [ngClass]="{ 'option-selected': option.isSelected }">
+                {{option.optionLabel}}
+              </span>
+            </ng-container>
+          </div>
         </div>
         <div class="mt-2 column-2">
-          <lib-calendar [selectedDates]="selectedDates" #calendar></lib-calendar>
+          <lib-calendar
+            #calendar
+            [selectedDates]="selectedDates"
+            [minDate]="minDate"
+            [maxDate]="maxDate"
+          ></lib-calendar>
         </div>
       </div>
       <div class="row-2 br-top">
         <div class="text-end my-2 w-full">
           <div class="footer-content">
-            <span id="range-label-text">
-              {{ calendar?.selectedDates?.start | date: 'yyyy-MM-dd' }}
-              <span *ngIf="calendar?.selectedDates?.end">
-                <span> - {{calendar.selectedDates.end | date:'yyyy-MM-dd'}} </span>
-              </span>
-            </span>
             <div class="d-inline buttons">
-              <button mat-button mat-raised-button class="p-3 mx-2" (click)="isOpen=false;">Cancel</button>
+              <button mat-button mat-raised-button class="p-3 mx-2" (click)="isOpen=false;">{{ labels?.cancelLabel || 'Cancel' }}</button>
               <button mat-button mat-raised-button color="primary" class="ms-2 p-3"
-                [class.disabled]="!(calendar?.selectedDates?.start && calendar?.selectedDates?.end)"
-                (click)="updateCustomRange(dateInput,calendar.selectedDates); isOpen=false;">Apply</button>
+                      [class.disabled]="!(calendar?.selectedDates?.start && calendar?.selectedDates?.end)"
+                      (click)="updateCustomRange(calendar.selectedDates); isOpen=false;">{{ labels?.applyLabel || 'Apply' }}</button>
             </div>
           </div>
         </div>
       </div>
     </div>
   </ng-template>
-</div>
+</span>

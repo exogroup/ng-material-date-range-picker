@@ -1,6 +1,4 @@
 /**
- * @(#)ng-date-picker.component.scss Sept 05, 2023
-
  * @author Aakash Kumar
  */
 
@@ -19,8 +17,8 @@ mat-list-item {
   max-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  max-width: 700px;
-  margin-top: -22px;
+  max-width: 710px;
+  margin-top: 8px;
   border: 1px solid var(--border-color, #ddd);
 }
 
@@ -62,6 +60,7 @@ mat-list-item {
   width: 100%;
   display: block;
   float: left;
+  overflow-y: hidden;
 }
 
 .row-1,
@@ -72,7 +71,7 @@ mat-list-item {
 }
 
 .row-2 {
-  padding: 0.7rem;
+  padding: 0.7rem 0;
 }
 
 .footer-content {
@@ -80,16 +79,19 @@ mat-list-item {
   align-items: center;
   display: flex;
   text-align: right;
-  justify-content: end;
+  justify-content: flex-end;
   gap: 10px;
-  margin-right: 2rem;
   text-overflow: ellipsis;
 }
 
 .buttons {
-  margin-right: 1.5rem;
+  margin-right: 25px;
+  margin-left: 25px;
   display: flex;
-  gap: 10px;
+  flex-flow: row;
+  width: 100%;
+  align-content: space-between;
+  justify-content: space-between;
 }
 
 .column-1 {
@@ -129,21 +131,55 @@ mat-list-item {
   }
 }
 
-.date-picker-main {
-  margin: 30px;
-}
-
 .default-options-container {
   margin-bottom: 5px;
+  border-bottom: 1px solid #E5E5E5;
+  display: flex;
+  justify-content: center;
+
+  .scrollable-options-wrapper {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    gap: 12px;
+
+    .option-ele-mobile {
+      white-space: nowrap;
+      text-align: center;
+      cursor: pointer;
+
+     &.option-selected {
+      color: #0072ba;
+     }
+    }
+  }
 
   .option-ele {
+    cursor: pointer;
     font-size: 13px;
     display: inline-block;
     padding: 8px 12px;
 
     &.option-selected {
-      color: #0000ff;
+      color: #0072ba;
+    }
+  }
+  .scroll-icon {
+    font-size: 26px;
+    height: auto;
+    width: auto;
+  }
+
+  button[disabled] {
+    opacity: 0.4;
+    color: #ccc !important;
+
+    .scroll-icon {
+      color: #ccc !important;
     }
   }
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
