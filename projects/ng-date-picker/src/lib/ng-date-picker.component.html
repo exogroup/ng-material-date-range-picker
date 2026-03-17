@@ -2,7 +2,9 @@
 
   <!-- input form -->
   <mat-form-field id="{{ calendarIdentifier }}" [class.w-full]="isFullWidth" (click)="toggleDateOptionSelectionList()">
-    <mat-label *ngIf="showLabel">{{ labels?.inputLabel }}</mat-label>
+    @if (showLabel) {
+      <mat-label>{{ labels?.inputLabel }}</mat-label>
+    }
     <input matInput readonly="readonly" [formControl]="date" class="cursor-pointer">
     <mat-icon matSuffix class="cursor-pointer">date_range</mat-icon>
   </mat-form-field>
@@ -20,46 +22,54 @@
     (backdropClick)="toggleCustomDateRangeView()">
     <div class="custom-ckd-container custom-calendar-container" [class]="{ 'without-default-opt': !showDefaultOptions }">
       <div class="row-1">
-        <div *ngIf="dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions">
-          <div class="default-options-container mobile" *ngIf="isMobileView">
-            <button mat-button
-              (click)="scrollLeft()"
-              [disabled]="isLeftDisabled"
-              aria-label="Previous options">
-              <mat-icon class="scroll-icon">chevron_left</mat-icon>
-            </button>
-            <div class="scrollable-options-wrapper"
-              (scroll)="calculateScrollButtonsState()"
-              #scrollableWrapper>
-              <ng-container *ngFor="let option of dateDropDownOptions">
-                <span
-                  *ngIf="option.isVisible"
-                  class="option-ele-mobile"
-                  (click)="updateSelection(option)"
-                  [ngClass]="{ 'option-selected': option.isSelected }">
-                  {{ option.optionLabel }}
-                </span>
-              </ng-container>
-            </div>
-            <button mat-button
-              (click)="scrollRight()"
-              [disabled]="isRightDisabled"
-              aria-label="Next options">
-              <mat-icon class="scroll-icon">chevron_right</mat-icon>
-            </button>
+        @if (dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions) {
+          <div>
+            @if (isMobileView) {
+              <div class="default-options-container mobile">
+                <button mat-button
+                  (click)="scrollLeft()"
+                  [disabled]="isLeftDisabled"
+                  aria-label="Previous options">
+                  <mat-icon class="scroll-icon">chevron_left</mat-icon>
+                </button>
+                <div class="scrollable-options-wrapper"
+                  (scroll)="calculateScrollButtonsState()"
+                  #scrollableWrapper>
+                  @for (option of dateDropDownOptions; track option) {
+                    @if (option.isVisible) {
+                      <span
+                        class="option-ele-mobile"
+                        (click)="updateSelection(option)"
+                        [ngClass]="{ 'option-selected': option.isSelected }">
+                        {{ option.optionLabel }}
+                      </span>
+                    }
+                  }
+                </div>
+                <button mat-button
+                  (click)="scrollRight()"
+                  [disabled]="isRightDisabled"
+                  aria-label="Next options">
+                  <mat-icon class="scroll-icon">chevron_right</mat-icon>
+                </button>
+              </div>
+            }
+            @if (!isMobileView) {
+              <div class="default-options-container desktop">
+                @for (option of dateDropDownOptions; track option) {
+                  @if (option.isVisible) {
+                    <span
+                      class="option-ele"
+                      (click)="updateSelection(option)"
+                      [ngClass]="{ 'option-selected': option.isSelected }">
+                      {{option.optionLabel}}
+                    </span>
+                  }
+                }
+              </div>
+            }
           </div>
-          <div class="default-options-container desktop" *ngIf="!isMobileView">
-            <ng-container *ngFor="let option of dateDropDownOptions">
-              <span
-                *ngIf="option.isVisible"
-                class="option-ele"
-                (click)="updateSelection(option)"
-                [ngClass]="{ 'option-selected': option.isSelected }">
-                {{option.optionLabel}}
-              </span>
-            </ng-container>
-          </div>
-        </div>
+        }
         <div class="mt-2 column-2">
           <lib-calendar
             #calendar
@@ -75,8 +85,8 @@
             <div class="d-inline buttons">
               <button mat-button mat-raised-button class="p-3 mx-2" (click)="isOpen=false;">{{ labels?.cancelLabel || 'Cancel' }}</button>
               <button mat-button mat-raised-button color="primary" class="ms-2 p-3"
-                      [class.disabled]="!(calendar?.selectedDates?.start && calendar?.selectedDates?.end)"
-                      (click)="updateCustomRange(calendar.selectedDates); isOpen=false;">{{ labels?.applyLabel || 'Apply' }}</button>
+                [class.disabled]="!(calendar?.selectedDates?.start && calendar?.selectedDates?.end)"
+              (click)="updateCustomRange(calendar.selectedDates); isOpen=false;">{{ labels?.applyLabel || 'Apply' }}</button>
             </div>
           </div>
         </div>
