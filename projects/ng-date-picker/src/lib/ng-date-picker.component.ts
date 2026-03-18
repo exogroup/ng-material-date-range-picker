@@ -24,13 +24,14 @@ import { LabelsConfig } from './model/labels-config.model';
 import { isElementInView, scrollElementIntoView } from './helpers/scroll-helper';
 
 @Component({
-  selector: 'ng-date-range-picker',
-  templateUrl: './ng-date-picker.component.html',
-  styleUrls: ['./ng-date-picker.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
-  ],
+    selector: 'ng-date-range-picker',
+    templateUrl: './ng-date-picker.component.html',
+    styleUrls: ['./ng-date-picker.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+    ],
+    standalone: false
 })
 export class NgDatePickerComponent implements OnInit, AfterViewInit {
   isDateOptionList: boolean = false;
