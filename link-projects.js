@@ -18,19 +18,29 @@ const printErrAndExit = (x) => {
 try  {
   const localConfig = json5.parse(fs.readFileSync('./.local-config.json'));
   if (localConfig) {
-    prettyPrint(32, '📃 Running command with local config file\n');
+    prettyPrint(32, 'Running command with local config file\n');
   } else {
-    prettyPrint(34, '🙅 No local config found\n');
+    prettyPrint(32, 'No local config found\n');
   }
 
   const ngDatePickerPath = `${childProcess.execSync('pwd')}`.trim();
+  const distPackagePath = path.join(ngDatePickerPath, 'dist', 'exogroup', 'ng-material-date-range-picker');
 
-  prettyPrint(32, '📁 Changing to the ng-material-date-range-picker dist path: ' + ngDatePickerPath + '/dist/exogroup/ng-material-date-range-picker and 🔗 Run npm link');
-  childProcess.execSync('cd ' + ngDatePickerPath + '/dist/exogroup/ng-material-date-range-picker && npm link');
+  if (!fs.existsSync(distPackagePath)) {
+    prettyPrint(33, 'dist package not found, running build:lib:prod to generate it');
+    childProcess.execSync('npm run build:lib:prod', { cwd: ngDatePickerPath, stdio: 'inherit' });
+
+    if (!fs.existsSync(distPackagePath)) {
+      throw new Error('dist package path still missing after build: ' + distPackagePath);
+    }
+  }
+
+  prettyPrint(32, 'Changing to the ng-material-date-range-picker dist path: ' + distPackagePath + ' and run npm link');
+  childProcess.execSync('npm link', { cwd: distPackagePath, stdio: 'inherit' });
 
   localConfig?.projects.forEach(project => {
     // move back to the current ng-material-date-range-picker path
-    prettyPrint(32, '📁 Changing to the ng-material-date-range-picker path: ' + ngDatePickerPath);
+    prettyPrint(32, 'Changing to the ng-material-date-range-picker path: ' + ngDatePickerPath);
     process.chdir(ngDatePickerPath);
 
     // project
@@ -39,7 +49,7 @@ try  {
 
     // Check if ng-material-date-range-picker exists in package.json
     if (findNgDatePicker.length === 1) {
-      prettyPrint(33, '⚠️  @exogroup/ng-material-date-range-picker not found in ' + project + '/package.json, skipping');
+      prettyPrint(33, '@exogroup/ng-material-date-range-picker not found in ' + project + '/package.json, skipping');
       return;
     }
 
@@ -83,28 +93,28 @@ try  {
     // Remove any trailing comma from the last dependency entry
     finalPackageJsonContent = finalPackageJsonContent.replace(/,(\s*})/, '$1');
 
-    prettyPrint(32, '✍️ Writing file: ' + project + '/package.json');
+    prettyPrint(32, 'Writing file: ' + project + '/package.json');
     fs.writeFileSync(project + '/package.json', JSON.stringify(json5.parse(finalPackageJsonContent), null, 2));
 
     // go to the project path
-    prettyPrint(32, '📁 Changing to project folder: ' + project);
+    prettyPrint(32, 'Changing to project folder: ' + project);
     process.chdir(project);
-    prettyPrint(32, '💾 Running npm install');
+    prettyPrint(32, 'Running npm install');
     childProcess.execSync('npm install');
-    prettyPrint(32, '📁 Running npm link @exogroup/ng-material-date-range-picker: ' + project);
+    prettyPrint(32, 'Running npm link @exogroup/ng-material-date-range-picker: ' + project);
     childProcess.execSync('npm link @exogroup/ng-material-date-range-picker');
-    prettyPrint(32, '💾 Running npm install: ' + ngDatePickerPath + '/dist/exogroup/ng-material-date-range-picker');
+    prettyPrint(32, 'Running npm install: ' + ngDatePickerPath + '/dist/exogroup/ng-material-date-range-picker');
     childProcess.execSync('npm install "' + ngDatePickerPath + '/dist/exogroup/ng-material-date-range-picker"');
 
     const tsconfigJson = json5.parse(fs.readFileSync(project + '/tsconfig.json'));
     const relativePath = path.relative(project, `${ngDatePickerPath}/dist/exogroup/ng-material-date-range-picker`);
     tsconfigJson.compilerOptions.paths["@exogroup/ng-material-date-range-picker/*"] = [relativePath];
 
-    prettyPrint(32, '✍️ Writing file: ' + project + '/tsconfig.json');
+    prettyPrint(32, 'Writing file: ' + project + '/tsconfig.json');
     fs.writeFileSync(project + '/tsconfig.json', JSON.stringify(tsconfigJson, null, 2));
   });
 
-  prettyPrint(32, '✅️ All done');
+  prettyPrint(32, 'All done');
 } catch (e) {
 
   printErrAndExit(e.message);
