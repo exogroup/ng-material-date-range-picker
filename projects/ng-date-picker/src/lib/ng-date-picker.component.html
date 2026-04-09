@@ -1,5 +1,15 @@
 <span class="date-picker-main" cdkOverlayOrigin #trigger>
 
+  <ng-template #dateOption let-option let-mobile="mobile">
+    <span
+      *ngIf="option.isVisible"
+      [class]="mobile ? 'option-ele-mobile' : 'option-ele'"
+      (click)="updateSelection(option)"
+      [ngClass]="{ 'option-selected': option.isSelected }">
+      {{ option.optionLabel }}
+    </span>
+  </ng-template>
+
   <!-- input form -->
   <mat-form-field id="{{ calendarIdentifier }}" [class.w-full]="isFullWidth" (click)="toggleDateOptionSelectionList()">
     <mat-label *ngIf="showLabel">{{ labels?.inputLabel }}</mat-label>
@@ -18,10 +28,22 @@
     [cdkConnectedOverlayOffsetX]="cdkConnectedOverlayOffsetX"
     [cdkConnectedOverlayOffsetY]="cdkConnectedOverlayOffsetY"
     (backdropClick)="toggleCustomDateRangeView()">
-    <div class="custom-ckd-container custom-calendar-container" [class]="{ 'without-default-opt': !showDefaultOptions }">
-      <div class="row-1">
-        <div *ngIf="dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions">
-          <div class="default-options-container mobile" *ngIf="isMobileView">
+    <div class="custom-ckd-container custom-calendar-container" [ngClass]="{ 'without-default-opt': !showDefaultOptions }">
+      <div class="row-1" [ngClass]="{ 'desktop-layout': !isMobileView && showDefaultOptions && dateDropDownOptions.length }">
+        <div
+          class="column-1 br-right preset-sidebar"
+          *ngIf="!isMobileView && dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions">
+          <div class="default-options-container desktop">
+            <ng-container *ngFor="let option of dateDropDownOptions">
+              <ng-container
+                [ngTemplateOutlet]="dateOption"
+                [ngTemplateOutletContext]="{ $implicit: option, mobile: false }">
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+        <div class="column-2">
+          <div class="default-options-container mobile" *ngIf="isMobileView && dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions">
             <button mat-button
               (click)="scrollLeft()"
               [disabled]="isLeftDisabled"
@@ -32,13 +54,10 @@
               (scroll)="calculateScrollButtonsState()"
               #scrollableWrapper>
               <ng-container *ngFor="let option of dateDropDownOptions">
-                <span
-                  *ngIf="option.isVisible"
-                  class="option-ele-mobile"
-                  (click)="updateSelection(option)"
-                  [ngClass]="{ 'option-selected': option.isSelected }">
-                  {{ option.optionLabel }}
-                </span>
+                <ng-container
+                  [ngTemplateOutlet]="dateOption"
+                  [ngTemplateOutletContext]="{ $implicit: option, mobile: true }">
+                </ng-container>
               </ng-container>
             </div>
             <button mat-button
@@ -48,19 +67,7 @@
               <mat-icon class="scroll-icon">chevron_right</mat-icon>
             </button>
           </div>
-          <div class="default-options-container desktop" *ngIf="!isMobileView">
-            <ng-container *ngFor="let option of dateDropDownOptions">
-              <span
-                *ngIf="option.isVisible"
-                class="option-ele"
-                (click)="updateSelection(option)"
-                [ngClass]="{ 'option-selected': option.isSelected }">
-                {{option.optionLabel}}
-              </span>
-            </ng-container>
-          </div>
-        </div>
-        <div class="mt-2 column-2">
+
           <lib-calendar
             #calendar
             [selectedDates]="selectedDates"
