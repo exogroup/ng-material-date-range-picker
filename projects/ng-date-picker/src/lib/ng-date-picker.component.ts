@@ -158,11 +158,17 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    */
   scrollLeft(): void {
     if (this.scrollableWrapper?.nativeElement) {
-      const scrollDistance = this.scrollableWrapper.nativeElement.clientWidth * 0.6;
-      this.scrollableWrapper.nativeElement.scrollBy({
-        left: -scrollDistance,
-        behavior: 'smooth'
-      });
+      const el = this.scrollableWrapper.nativeElement;
+      const scrollDistance = el.clientWidth * 0.6;
+      const newScrollLeft = Math.max(el.scrollLeft - scrollDistance, 0);
+      const actualDistance = el.scrollLeft - newScrollLeft;
+
+      if (actualDistance > 0) {
+        el.scrollBy({
+          left: -actualDistance,
+          behavior: 'smooth'
+        });
+      }
     }
   }
 
@@ -171,11 +177,18 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
    */
   scrollRight(): void {
     if (this.scrollableWrapper?.nativeElement) {
-      const scrollDistance = this.scrollableWrapper.nativeElement.clientWidth * 0.6;
-      this.scrollableWrapper.nativeElement.scrollBy({
-        left: scrollDistance,
-        behavior: 'smooth'
-      });
+      const el = this.scrollableWrapper.nativeElement;
+      const scrollDistance = el.clientWidth * 0.6;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      const newScrollLeft = Math.min(el.scrollLeft + scrollDistance, maxScroll);
+      const actualDistance = newScrollLeft - el.scrollLeft;
+
+      if (actualDistance > 0) {
+        el.scrollBy({
+          left: actualDistance,
+          behavior: 'smooth'
+        });
+      }
     }
   }
 
@@ -186,14 +199,13 @@ export class NgDatePickerComponent implements OnInit, AfterViewInit {
     if (!this.scrollableWrapper) return;
 
     const el = this.scrollableWrapper.nativeElement;
-    const tolerance = 2;
+    const tolerance = 1;
 
-    // Right button
-    const rightEdge = Math.abs(el.scrollLeft + el.clientWidth - el.scrollWidth);
-    this.isRightDisabled = rightEdge <= tolerance;
+    // Right button - disable when scrolled to the end
+    this.isRightDisabled = el.scrollLeft + el.clientWidth >= el.scrollWidth - tolerance;
 
     // Left button
-    this.isLeftDisabled = el.scrollLeft === 0;
+    this.isLeftDisabled = el.scrollLeft <= 0;
 
     this.cdref.markForCheck();
   }
