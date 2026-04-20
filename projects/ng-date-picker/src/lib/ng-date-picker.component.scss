@@ -17,7 +17,7 @@ mat-list-item {
   max-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  max-width: 710px;
+  max-width: 867px;
   margin-top: 8px;
   border: 1px solid var(--border-color, #ddd);
 }
@@ -105,6 +105,16 @@ mat-list-item {
   float: left;
 }
 
+.desktop-layout {
+  display: flex;
+  align-items: stretch;
+}
+
+.preset-sidebar {
+  width: fit-content;
+  white-space: nowrap;
+}
+
 @media (max-width: 400px) {
   .footer-content {
     display: block;
@@ -178,6 +188,21 @@ mat-list-item {
       color: #ccc !important;
     }
   }
+}
+
+.default-options-container.desktop {
+  height: 100%;
+  margin-bottom: 0;
+  border-bottom: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 10px;
+}
+
+.default-options-container.desktop .option-ele {
+  padding: 6px 10px !important;
+  font-size: 14px;
 }
 
 .cursor-pointer {
