@@ -1,5 +1,15 @@
 <span class="date-picker-main" cdkOverlayOrigin #trigger>
 
+  <ng-template #dateOption let-option let-mobile="mobile">
+    <span
+      *ngIf="option.isVisible"
+      [class]="mobile ? 'option-ele-mobile' : 'option-ele'"
+      (click)="updateSelection(option)"
+      [ngClass]="{ 'option-selected': option.isSelected }">
+      {{ option.optionLabel }}
+    </span>
+  </ng-template>
+
   <!-- input form -->
   <mat-form-field id="{{ calendarIdentifier }}" [class.w-full]="isFullWidth" (click)="toggleDateOptionSelectionList()">
     @if (showLabel) {
@@ -21,56 +31,47 @@
     [cdkConnectedOverlayOffsetY]="cdkConnectedOverlayOffsetY"
     (backdropClick)="toggleCustomDateRangeView()">
     <div class="custom-ckd-container custom-calendar-container" [class]="{ 'without-default-opt': !showDefaultOptions }">
-      <div class="row-1">
-        @if (dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions) {
-          <div>
-            @if (isMobileView) {
-              <div class="default-options-container mobile">
-                <button mat-button
-                  (click)="scrollLeft()"
-                  [disabled]="isLeftDisabled"
-                  aria-label="Previous options">
-                  <mat-icon class="scroll-icon">chevron_left</mat-icon>
-                </button>
-                <div class="scrollable-options-wrapper"
-                  (scroll)="calculateScrollButtonsState()"
-                  #scrollableWrapper>
-                  @for (option of dateDropDownOptions; track option) {
-                    @if (option.isVisible) {
-                      <span
-                        class="option-ele-mobile"
-                        (click)="updateSelection(option)"
-                        [ngClass]="{ 'option-selected': option.isSelected }">
-                        {{ option.optionLabel }}
-                      </span>
-                    }
-                  }
-                </div>
-                <button mat-button
-                  (click)="scrollRight()"
-                  [disabled]="isRightDisabled"
-                  aria-label="Next options">
-                  <mat-icon class="scroll-icon">chevron_right</mat-icon>
-                </button>
-              </div>
-            }
-            @if (!isMobileView) {
-              <div class="default-options-container desktop">
-                @for (option of dateDropDownOptions; track option) {
-                  @if (option.isVisible) {
-                    <span
-                      class="option-ele"
-                      (click)="updateSelection(option)"
-                      [ngClass]="{ 'option-selected': option.isSelected }">
-                      {{option.optionLabel}}
-                    </span>
-                  }
-                }
-              </div>
-            }
+      <div class="row-1" [class]="{ 'desktop-layout': !isMobileView && showDefaultOptions && dateDropDownOptions.length }">
+        @if (!isMobileView && dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions) {
+          <div class="column-1 br-right preset-sidebar">
+            <div class="default-options-container desktop">
+              @for (option of dateDropDownOptions; track option.optionKey) {
+                <ng-container
+                  [ngTemplateOutlet]="dateOption"
+                  [ngTemplateOutletContext]="{ $implicit: option, mobile: false }">
+                </ng-container>
+              }
+            </div>
           </div>
         }
-        <div class="mt-2 column-2">
+        <div class="column-2">
+          @if (isMobileView && dateDropDownOptions && dateDropDownOptions.length && showDefaultOptions) {
+            <div class="default-options-container mobile">
+              <button mat-button
+                (click)="scrollLeft()"
+                [disabled]="isLeftDisabled"
+                aria-label="Previous options">
+                <mat-icon class="scroll-icon">chevron_left</mat-icon>
+              </button>
+              <div class="scrollable-options-wrapper"
+                (scroll)="calculateScrollButtonsState()"
+                #scrollableWrapper>
+                @for (option of dateDropDownOptions; track option.optionKey) {
+                  <ng-container
+                    [ngTemplateOutlet]="dateOption"
+                    [ngTemplateOutletContext]="{ $implicit: option, mobile: true }">
+                  </ng-container>
+                }
+              </div>
+              <button mat-button
+                (click)="scrollRight()"
+                [disabled]="isRightDisabled"
+                aria-label="Next options">
+                <mat-icon class="scroll-icon">chevron_right</mat-icon>
+              </button>
+            </div>
+          }
+
           <lib-calendar
             #calendar
             [selectedDates]="selectedDates"
