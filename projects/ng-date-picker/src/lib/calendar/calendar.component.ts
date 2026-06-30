@@ -19,10 +19,11 @@ import { DateRange, MatCalendar } from '@angular/material/datepicker';
 import { CalendarViewData } from '../model/calendar-view-data';
 
 @Component({
-  selector: 'lib-calendar',
-  templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'lib-calendar',
+    templateUrl: './calendar.component.html',
+    styleUrls: ['./calendar.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class CalendarComponent implements OnInit, AfterViewInit {
   firstCalendarViewData!: CalendarViewData;

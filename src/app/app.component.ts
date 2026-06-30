@@ -10,13 +10,15 @@ import { DateTimeParser } from './models/datetime-parser.model';
 import { SelectedDateEvent } from '../../projects/ng-date-picker/src/lib/model/date-selection-event-data';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: false
 })
 export class AppComponent implements OnDestroy {
   private ngUnsubscribe: Subject<void> = new Subject<void>();
   private timezoneDate: string | undefined;
+  title = 'exogroup-date-range-picker';
   dateFormat = 'YYYY-MM-DD';
   calendarIdentifier = 'exo-date-range-picker';
 
