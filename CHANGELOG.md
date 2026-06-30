@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.0.0] - 2026-06-30
+- EX-31072 Upgrade to Angular 21
+
 ## [2.2.0] - 2024-02-07
 - Exposed Id for dropdown and calendar.
 - Exposed option to control default options.
